@@ -20,6 +20,7 @@ import static retrofit2.Utils.methodError;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import javax.annotation.Nullable;
+import retrofit2.internal.WebSocket;
 
 abstract class ServiceMethod<T> {
   static <T> ServiceMethod<T> parseAnnotations(Retrofit retrofit, Method method) {
@@ -34,6 +35,11 @@ abstract class ServiceMethod<T> {
     }
     if (returnType == void.class) {
       throw methodError(method, "Service methods cannot return void.");
+    }
+
+    if (Utils.getRawType(returnType) == WebSocket.class) {
+      //noinspection unchecked Return type checked by enclosing conditional.
+      return (ServiceMethod<T>) new WebSocketServiceMethod.Builder(retrofit, method).build();
     }
 
     return HttpServiceMethod.parseAnnotations(retrofit, method, requestFactory);
